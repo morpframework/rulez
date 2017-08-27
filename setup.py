@@ -1,0 +1,29 @@
+from setuptools import setup, find_packages
+import sys
+import os
+
+version = '0.0'
+
+setup(name='rulez',
+      version=version,
+      description="Simple business rules engine configurable using YAML/JSON",
+      long_description="""\
+""",
+      classifiers=[],  # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      keywords='business-rules rules reg',
+      author='Izhar Firdaus',
+      author_email='izhar@abyres.net',
+      url='http://github.com/abyres/',
+      license='MIT',
+      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      include_package_data=True,
+      zip_safe=False,
+      install_requires=[
+          'reg',
+          'dectate'
+          # -*- Extra requirements: -*-
+      ],
+      entry_points="""
+      # -*- Entry points: -*-
+      """,
+      )
