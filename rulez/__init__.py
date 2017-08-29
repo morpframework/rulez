@@ -4,7 +4,7 @@ from .compiler import native, sqlalchemy
 from . import operator
 from .engine import Engine
 from .compiler.native import operator as operator_compiler
-from .dsl import field, or_, and_
+from .dsl import field, or_, and_, parse_dsl
 import dectate
 
 dectate.commit(Engine)

@@ -20,7 +20,8 @@ setup(name='rulez',
       zip_safe=False,
       install_requires=[
           'reg',
-          'dectate'
+          'dectate',
+          'boolean.py'
           # -*- Extra requirements: -*-
       ],
       entry_points="""
