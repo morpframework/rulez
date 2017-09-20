@@ -2,22 +2,38 @@ import shlex
 import re
 import boolean
 import json
+from .engine import OperatorNotAllowedError
 
 
 class AND(boolean.AND):
 
-    def json(self):
+    def json(self, allowed_operators=None):
+        allowed_operators = allowed_operators or []
+        values = []
+        for a in self.args:
+            j = a.json(allowed_operators)
+            if allowed_operators and j['operator'].lower() not in allowed_operators:
+                raise OperatorNotAllowedError(j['operator'])
+            values.append(j)
         return {
             'operator': 'and',
-            'value': [a.json() for a in self.args]
+            'value': values
         }
 
 
 class OR(boolean.OR):
-    def json(self):
+
+    def json(self, allowed_operators=None):
+        allowed_operators = allowed_operators or []
+        values = []
+        for a in self.args:
+            j = a.json(allowed_operators)
+            if allowed_operators and j['operator'].lower() not in allowed_operators:
+                raise OperatorNotAllowedError(j['operator'])
+            values.append(j)
         return {
             'operator': 'or',
-            'value': [a.json() for a in self.args]
+            'value': values
         }
 
 
@@ -26,7 +42,10 @@ class FIELD(boolean.Symbol):
     def decode_symbol(self):
         for op in ['==', '<=', '>=', '!=', '<', '>', '=', ' in ']:
             if op in self.obj:
-                k, v = self.obj.split(op)
+                ss = self.obj.split(op)
+                if len(ss) != 2:
+                    raise ValueError('Unable to decode "%s"' % self.obj)
+                k, v = ss
                 if op.strip() in ['in']:
                     v = json.loads(v)
                 else:
@@ -34,7 +53,8 @@ class FIELD(boolean.Symbol):
                 return k.strip(), op.strip(), v
         raise ValueError("Unable to decode symbol '%s'" % self.obj)
 
-    def json(self):
+    def json(self, allowed_operators=None):
+        allowed_operators = allowed_operators or []
         s = self.decode_symbol()
         k, o, v = s
         value = v
@@ -44,6 +64,8 @@ class FIELD(boolean.Symbol):
                     value = float(value)
                 else:
                     value = int(value)
+        if allowed_operators and o.lower() not in allowed_operators:
+            raise OperatorNotAllowedError(o)
         return {
             'field': k,
             'operator': o,
@@ -86,10 +108,16 @@ class BooleanAlgebra(boolean.BooleanAlgebra):
                 yield boolean.TOKEN_SYMBOL, tok, col
 
 
-def parse_dsl(s):
+def parse_dsl(s, allowed_operators=None):
+    allowed_operators = allowed_operators or []
     algebra = BooleanAlgebra()
     parsed = algebra.parse(s)
-    return parsed.json()
+    res = parsed.json(allowed_operators)
+    for i in res:
+        if allowed_operators and (
+                res['operator'].lower() not in allowed_operators):
+            raise OperatorNotAllowedError(res['operator'])
+    return res
 
 
 class Field(object):

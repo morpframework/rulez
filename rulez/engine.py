@@ -5,7 +5,7 @@ import reg
 class OperatorNotAllowedError(Exception):
 
     def __init__(self, message, *args, **kwargs):
-        message = "Operator '%s' is not allowed"
+        message = "Operator '%s' is not allowed" % message
         super(OperatorNotAllowedError, self).__init__(message, *args, **kwargs)
 
 
