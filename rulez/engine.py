@@ -9,6 +9,14 @@ class OperatorNotAllowedError(Exception):
         super(OperatorNotAllowedError, self).__init__(message, *args, **kwargs)
 
 
+class NestedOperationNotAllowedError(Exception):
+
+    def __init__(self, message, *args, **kwargs):
+        message = "NestedOperation '%s' is not allowed" % message
+        super(NestedOperationNotAllowedError, self).__init__(
+            message, *args, **kwargs)
+
+
 class OperatorAction(dectate.Action):
 
     app_class_arg = True
@@ -157,8 +165,9 @@ class Engine(dectate.App):
     def parse_action(self, config):
         return self.get_action(**config)
 
-    def compile_condition(self, method, query, allowed_operators=None):
-        self.validate_condition(query, allowed_operators)
+    def compile_condition(self, method, query, allowed_operators=None,
+                          allow_nested=True):
+        self.validate_condition(query, allowed_operators, allow_nested)
         q = self.parse_condition(query)
         return self.compile_operator(method, q)
 
@@ -167,19 +176,22 @@ class Engine(dectate.App):
     def compile_rulechain(self, method, rulechain):
         raise NotImplementedError
 
-    def validate_condition(self, query, allowed_operators=None):
+    def validate_condition(self, query, allowed_operators=None,
+                           allow_nested=True):
         parsed = self.parse_condition(query)
-        self._validate_condition(parsed, allowed_operators)
+        self._validate_condition(parsed, allowed_operators, allow_nested)
 
-    def _validate_condition(self, query, allowed_operators=None):
+    def _validate_condition(self, query, allowed_operators=None,
+                            allow_nested=True):
         from .operator import Operator
-        if allowed_operators is None:
-            return
 
-        if query.operator not in allowed_operators:
+        if (allowed_operators is not None and
+                query.operator not in allowed_operators):
             raise OperatorNotAllowedError(query.operator)
 
         if isinstance(query.value, list) or isinstance(query.value, tuple):
             for v in query.value:
-                if isinstance(v, Operator):
+                if isinstance(v, Operator) and allow_nested:
                     self._validate_condition(v, allowed_operators)
+                elif isinstance(v, Operator) and not allow_nested:
+                    raise NestedOperationNotAllowedError(query)

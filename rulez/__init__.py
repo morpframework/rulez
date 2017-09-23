@@ -1,5 +1,6 @@
 #
 from .engine import OperatorNotAllowedError
+from .engine import NestedOperationNotAllowedError
 from .compiler import native, sqlalchemy
 from . import operator
 from .engine import Engine

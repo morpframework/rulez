@@ -5,6 +5,7 @@ def test_native_condition():
     from rulez import Engine
 #    from rulez import parse_condition, compile_condition
     from rulez import OperatorNotAllowedError
+    from rulez import NestedOperationNotAllowedError
     from rulez.operator import Operator
 
     rule = {
@@ -68,5 +69,23 @@ def test_native_condition():
     with pytest.raises(OperatorNotAllowedError):
         engine.compile_condition('native', {'operator': 'and', 'value': [
             {'field': 'age', 'operator': '>', 'value': 10},
-            {'field': 'age', 'operator': '<', 'value': 20}]},
+            {'field': 'age', 'operator': '<', 'value': 20},
+            {'operator': 'and',
+                'value': [
+                    {'field': 'age', 'operator': '<', 'value': 50},
+                    {'field': 'age', 'operator': '>', 'value': 5}
+                ]
+             }]},
             allowed_operators=['and', '>'])
+
+    with pytest.raises(NestedOperationNotAllowedError):
+        engine.compile_condition('native', {'operator': 'and', 'value': [
+            {'field': 'age', 'operator': '>', 'value': 10},
+            {'field': 'age', 'operator': '<', 'value': 20},
+            {'operator': 'and',
+                'value': [
+                    {'field': 'age', 'operator': '<', 'value': 50},
+                    {'field': 'age', 'operator': '>', 'value': 5}
+                ]
+             }]},
+            allow_nested=False)
