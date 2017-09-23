@@ -44,7 +44,8 @@ def test_native_condition():
 
     f = engine.compile_condition('native', {'operator': 'and', 'value': [
         {'field': 'age', 'operator': '>', 'value': 10},
-        {'field': 'age', 'operator': '<', 'value': 20}]})
+        {'field': 'age', 'operator': '<', 'value': 20}]},
+        nestable_operators=['and', 'or'])
     assert f({'age': 1}) is False
     assert f({'age': 40}) is False
     assert f({'age': 15}) is True
@@ -88,4 +89,4 @@ def test_native_condition():
                     {'field': 'age', 'operator': '>', 'value': 5}
                 ]
              }]},
-            allow_nested=False)
+            nestable_operators=['and', 'or'])

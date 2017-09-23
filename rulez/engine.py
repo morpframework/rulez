@@ -166,8 +166,8 @@ class Engine(dectate.App):
         return self.get_action(**config)
 
     def compile_condition(self, method, query, allowed_operators=None,
-                          allow_nested=True):
-        self.validate_condition(query, allowed_operators, allow_nested)
+                          nestable_operators=None):
+        self.validate_condition(query, allowed_operators, nestable_operators)
         q = self.parse_condition(query)
         return self.compile_operator(method, q)
 
@@ -177,12 +177,12 @@ class Engine(dectate.App):
         raise NotImplementedError
 
     def validate_condition(self, query, allowed_operators=None,
-                           allow_nested=True):
+                           nestable_operators=None):
         parsed = self.parse_condition(query)
-        self._validate_condition(parsed, allowed_operators, allow_nested)
+        self._validate_condition(parsed, allowed_operators, nestable_operators)
 
     def _validate_condition(self, query, allowed_operators=None,
-                            allow_nested=True):
+                            nestable_operators=None):
         from .operator import Operator
 
         if (allowed_operators is not None and
@@ -191,7 +191,9 @@ class Engine(dectate.App):
 
         if isinstance(query.value, list) or isinstance(query.value, tuple):
             for v in query.value:
-                if isinstance(v, Operator) and allow_nested:
+                if isinstance(v, Operator):
+                    if (nestable_operators is not None and
+                            query.operator in nestable_operators and
+                            v.operator in nestable_operators):
+                        raise NestedOperationNotAllowedError(query)
                     self._validate_condition(v, allowed_operators)
-                elif isinstance(v, Operator) and not allow_nested:
-                    raise NestedOperationNotAllowedError(query)
