@@ -9,7 +9,7 @@ METHOD = 'elasticsearch'
 @Engine.operator_compiler(method=METHOD, operator=rop.And)
 def and_(engine, method, operator):
     def func():
-        values = {}
+        values = []
         for value in operator.value:
             vv = engine.compile_operator(method, value)()
             values += vv['bool']['must']

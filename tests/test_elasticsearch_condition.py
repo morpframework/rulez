@@ -14,6 +14,9 @@ def test_elasticsearch_condition(elasticsearch):
     for age in [50, 18, 10, 17, 19]:
         es.index(index="test-index", doc_type='people', body={'age': age})
 
+    # give time for es to index
+    time.sleep(2)
+
     engine = Engine()
     rule = {
         "operator": "or", "value": [
@@ -25,13 +28,27 @@ def test_elasticsearch_condition(elasticsearch):
 
     f = engine.compile_condition('elasticsearch', rule)
 
-    # give time for es to index
-    time.sleep(2)
-
-    r = es.search(index='test-index', body={
+    r = es.search(index='test-index', doc_type='people', body={
         'query': f()
     })
 
     data = [o['_source'] for o in r['hits']['hits']]
 
     assert sorted([d['age'] for d in data]) == [10, 18, 50]
+
+    rule = {
+        "operator": "and", "value": [
+            {"field": "age", "operator": ">=", "value": 16},
+            {"field": "age", "operator": "<=", "value": 21},
+        ]
+    }
+
+    f = engine.compile_condition('elasticsearch', rule)
+
+    r = es.search(index='test-index', doc_type='people', body={
+        'query': f()
+    })
+
+    data = [o['_source'] for o in r['hits']['hits']]
+
+    assert sorted([d['age'] for d in data]) == [17, 18, 19]
