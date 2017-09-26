@@ -138,18 +138,18 @@ class Engine(dectate.App):
                       lambda self, method, operator: method),
         reg.match_instance('operator'))
     def compile_operator(self, method, operator):
-        raise NotImplementedError
+        raise NotImplementedError((method, operator))
 
     @reg.dispatch_method(
         reg.match_key('action', lambda self, action, parameter: action))
     def get_action(self, action, parameter):
-        raise NotImplementedError
+        raise NotImplementedError((action, parameter))
 
     @reg.dispatch_method(
         reg.match_key('method', lambda self, method, action: method),
         reg.match_instance('action'))
     def compile_action(self, method, action):
-        raise NotImplementedError
+        raise NotImplementedError((method, action))
 
     def parse_condition(self, config):
         param = {
