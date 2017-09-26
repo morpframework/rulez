@@ -1,6 +1,6 @@
 #
 from .engine import OperatorNotAllowedError
-from .compiler import native, sqlalchemy
+from .compiler import native, sqlalchemy, elasticsearch
 from . import operator
 from .engine import Engine
 from .compiler.native import operator as operator_compiler
