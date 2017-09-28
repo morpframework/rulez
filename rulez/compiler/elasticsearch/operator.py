@@ -1,7 +1,6 @@
 from ... import operator as rop
 from ...engine import Engine
 import operator as op
-from elasticsearch_dsl import Q
 
 METHOD = 'elasticsearch'
 
