@@ -29,7 +29,8 @@ def or_(engine, method, operator):
             values += vv['bool']['must']
         return {
             'bool': {
-                'should': values
+                'should': values,
+                'minimum_should_match': 1
             }
         }
     return func
@@ -71,4 +72,11 @@ def lt(engine, method, operator):
     def func():
         return {'bool': {'must': [
             {'range': {operator.field: {'lt': operator.value}}}]}}
+    return func
+
+
+@Engine.operator_compiler(method=METHOD, operator=rop.In)
+def in_(engine, method, operator):
+    def func():
+        return {'match': {operator.field: {'query': ' '.join(operator.value)}}}
     return func
