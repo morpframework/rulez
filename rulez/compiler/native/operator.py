@@ -83,3 +83,8 @@ def in_(engine, method, operator):
 @Engine.operator_compiler(method=METHOD, operator=rop.Get)
 def get(engine, method, operator):
     return lambda data: data[operator.value]
+
+
+@Engine.operator_compiler(method=METHOD, operator=rop.Like)
+def like(engine, method, operator):
+    return lambda data: operator.value in data[operator.field]

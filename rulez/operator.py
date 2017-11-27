@@ -78,3 +78,8 @@ class FieldGetter(Operator):
 @Engine.operator(operator='get', types=[str])
 class Get(FieldGetter):
     pass
+
+
+@Engine.operator(operator='~', types=[str])
+class Like(FieldOperator):
+    pass

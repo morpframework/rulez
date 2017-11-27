@@ -83,3 +83,11 @@ def in_(engine, method, operator):
         attr = getattr(model, operator.field)
         return attr.in_(operator.value)
     return func
+
+
+@Engine.operator_compiler(method=METHOD, operator=rop.Like)
+def like(engine, method, operator):
+    def func(model):
+        attr = getattr(model, operator.field)
+        return attr.ilike('%%%s%%' % operator.value)
+    return func
