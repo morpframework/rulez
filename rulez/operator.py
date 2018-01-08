@@ -43,6 +43,11 @@ class Equal(FieldOperator):
     pass
 
 
+@Engine.operator(operator='!=', types=[dict, str, float, int])
+class NotEqual(FieldOperator):
+    pass
+
+
 @Engine.operator(operator='<=', types=[dict, str, float, int])
 class LessEqualThan(FieldOperator):
     pass

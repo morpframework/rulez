@@ -33,6 +33,14 @@ def eq(engine, method, operator):
     return func
 
 
+@Engine.operator_compiler(method=METHOD, operator=rop.NotEqual)
+def ne(engine, method, operator):
+    def func(model):
+        attr = getattr(model, operator.field)
+        return attr != operator.value
+    return func
+
+
 @Engine.operator_compiler(method=METHOD, operator=rop.LessEqualThan)
 def le(engine, method, operator):
     def func(model):

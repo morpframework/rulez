@@ -35,6 +35,16 @@ def eq(engine, method, operator):
     return func
 
 
+@Engine.operator_compiler(method=METHOD, operator=rop.NotEqual)
+def ne(engine, method, operator):
+    def func(data):
+        value = operator.value
+        if isinstance(operator.value, rop.Operator):
+            value = engine.compile_operator(method, operator.value)(data)
+        return op.ne(data[operator.field], value)
+    return func
+
+
 @Engine.operator_compiler(method=METHOD, operator=rop.LessEqualThan)
 def le(engine, method, operator):
     def func(data):
