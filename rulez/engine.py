@@ -117,7 +117,7 @@ class Engine(dectate.App):
     @classmethod
     def operator(klass, operator, types):
         def func(op):
-            for t in types:
+            for t in types + [None]:
                 klass._operator(operator, t)(op)
             return op
         return func
