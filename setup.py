@@ -9,7 +9,11 @@ setup(name='rulez',
       description="Simple business rules engine configurable using YAML/JSON",
       long_description="""\
 """,
-      classifiers=[],  # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      # Get strings from
+      # http://pypi.python.org/pypi?%3Aaction=list_classifiers
+
+      classifiers=[],
+
       keywords='business-rules rules reg',
       author='Izhar Firdaus',
       author_email='izhar@abyres.net',
