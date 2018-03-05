@@ -21,7 +21,8 @@ setup(name='rulez',
       install_requires=[
           'reg',
           'dectate',
-          'boolean.py'
+          'boolean.py',
+          'jsonpath_ng',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
