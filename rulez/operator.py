@@ -1,5 +1,4 @@
 import reg
-from collections import abc
 import operator as op
 from .engine import Engine
 

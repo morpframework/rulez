@@ -27,6 +27,7 @@ setup(name='rulez',
           'dectate',
           'boolean.py',
           'jsonpath_ng',
+          'sqlalchemy'
           # -*- Extra requirements: -*-
       ],
       entry_points="""
