@@ -45,7 +45,9 @@ class Engine(dectate.App):
         dest = copy.deepcopy(dest)
         for p, f in rules:
             dest_pattern = jsonpath_ng.parse(p)
-            default = jsonpath_value(p, dest)
+            # default = jsonpath_value(p, dest)
+            # FIXME: get a sane default value
+            default = None
             dest = dest_pattern.update(dest, f(source, dest, default))
         return dest
 
