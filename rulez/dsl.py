@@ -60,9 +60,9 @@ class FIELD(boolean.Symbol):
         value = v
         if isinstance(value, str):
             if re.match(r'^[\d\.]+$', value):
-                if '.' in value:
+                if value.find('.') == 1:
                     value = float(value)
-                else:
+                elif value.find('.') < 1:
                     value = int(value)
         if allowed_operators and o.lower() not in allowed_operators:
             raise OperatorNotAllowedError(o)
