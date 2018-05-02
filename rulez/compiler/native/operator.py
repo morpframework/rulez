@@ -1,6 +1,7 @@
 from ... import operator as rop
 from ...engine import Engine
 import operator as op
+from jsonpath_ng import parse as jsonpath_parse
 
 METHOD = 'native'
 
@@ -31,7 +32,13 @@ def eq(engine, method, operator):
         value = operator.value
         if isinstance(operator.value, rop.Operator):
             value = engine.compile_operator(method, operator.value)(data)
-        return op.eq(data[operator.field], value)
+        if operator.field.startswith('$'):
+            match = jsonpath_parse(operator.field).find(data)
+            if match:
+                sourceval = match[0].value
+        else:
+            sourceval = data[operator.field]
+        return op.eq(sourceval, value)
     return func
 
 
@@ -41,7 +48,13 @@ def ne(engine, method, operator):
         value = operator.value
         if isinstance(operator.value, rop.Operator):
             value = engine.compile_operator(method, operator.value)(data)
-        return op.ne(data[operator.field], value)
+        if operator.field.startswith('$'):
+            match = jsonpath_parse(operator.field).find(data)
+            if match:
+                sourceval = match[0].value
+        else:
+            sourceval = data[operator.field]
+        return op.ne(sourceval, value)
     return func
 
 
@@ -61,7 +74,13 @@ def ge(engine, method, operator):
         value = operator.value
         if isinstance(operator.value, rop.Operator):
             value = engine.compile_operator(method, operator.value)(data)
-        return op.ge(data[operator.field], value)
+        if operator.field.startswith('$'):
+            match = jsonpath_parse(operator.field).find(data)
+            if match:
+                sourceval = match[0].value
+        else:
+            sourceval = data[operator.field]
+        return op.ge(sourceval, value)
     return func
 
 
@@ -71,7 +90,13 @@ def lt(engine, method, operator):
         value = operator.value
         if isinstance(operator.value, rop.Operator):
             value = engine.compile_operator(method, operator.value)(data)
-        return op.lt(data[operator.field], value)
+        if operator.field.startswith('$'):
+            match = jsonpath_parse(operator.field).find(data)
+            if match:
+                sourceval = match[0].value
+        else:
+            sourceval = data[operator.field]
+        return op.lt(sourceval, value)
     return func
 
 
@@ -81,13 +106,28 @@ def gt(engine, method, operator):
         value = operator.value
         if isinstance(operator.value, rop.Operator):
             value = engine.compile_operator(method, operator.value)(data)
-        return op.gt(data[operator.field], value)
+        if operator.field.startswith('$'):
+            match = jsonpath_parse(operator.field).find(data)
+            if match:
+                sourceval = match[0].value
+        else:
+            sourceval = data[operator.field]
+        return op.gt(sourceval, value)
     return func
 
 
 @Engine.operator_compiler(method=METHOD, operator=rop.In)
 def in_(engine, method, operator):
-    return lambda data: data[operator.field] in operator.value
+    def func(data):
+        value = operator.value
+        if operator.field.startswith('$'):
+            match = jsonpath_parse(operator.field).find(data)
+            if match:
+                sourceval = match[0].value
+        else:
+            sourceval = data[operator.field]
+        return sourceval in value
+    return func
 
 
 @Engine.operator_compiler(method=METHOD, operator=rop.Get)
@@ -97,4 +137,13 @@ def get(engine, method, operator):
 
 @Engine.operator_compiler(method=METHOD, operator=rop.Like)
 def like(engine, method, operator):
-    return lambda data: operator.value in data[operator.field]
+    def func(data):
+        value = operator.value
+        if operator.field.startswith('$'):
+            match = jsonpath_parse(operator.field).find(data)
+            if match:
+                sourceval = match[0].value
+        else:
+            sourceval = data[operator.field]
+        return value in sourceval
+    return func
