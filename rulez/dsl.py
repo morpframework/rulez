@@ -37,6 +37,9 @@ class OR(boolean.OR):
         }
 
 
+float_pattern = re.compile(r'^\d+\.\d+$')
+int_pattern = re.compile(r'^\d+$')
+
 class FIELD(boolean.Symbol):
 
     def decode_symbol(self):
@@ -47,7 +50,20 @@ class FIELD(boolean.Symbol):
                     raise ValueError('Unable to decode "%s"' % self.obj)
                 k, v = ss
                 if op.strip() in ['in']:
-                    v = json.loads(v)
+                    ov = v.strip()
+                    if ov.startswith('(') or ov.startswith('['):
+                        ov = ov[1:]
+                    if ov.endswith(')') or ov.endswith(']'):
+                        ov = ov[:-1]
+                    ov = ov.strip().split(',')
+                    v = []
+                    for vv in ov:
+                        vv = vv.strip()
+                        if float_pattern.match(vv):
+                            vv = float(vv)
+                        elif int_pattern.match(vv):
+                            vv = int(vv)
+                        v.append(vv)
                 else:
                     v = v.strip()
                 return k.strip(), op.strip(), v

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import sys
 import os
 
-version = '0.1.1'
+version = '0.1.2'
 
 setup(name='rulez',
       version=version,
@@ -30,6 +30,12 @@ setup(name='rulez',
           'sqlalchemy'
           # -*- Extra requirements: -*-
       ],
+      extras_require={
+          'test': [
+              'mirakuru',
+              'elasticsearch>=5.0.0,<6.0.0',
+          ]
+      },
       entry_points="""
       # -*- Entry points: -*-
       """,
