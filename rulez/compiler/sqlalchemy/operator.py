@@ -99,3 +99,13 @@ def like(engine, method, operator):
         attr = getattr(model, operator.field)
         return attr.ilike('%%%s%%' % operator.value)
     return func
+
+
+@Engine.operator_compiler(method=METHOD, operator=rop.Match)
+def match(engine, method, operator):
+    def func(model):
+        attr = getattr(model, operator.field)
+        return attr.match(operator.value)
+
+    return func
+

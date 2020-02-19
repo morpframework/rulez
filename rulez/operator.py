@@ -87,3 +87,7 @@ class Get(FieldGetter):
 @Engine.operator(operator='~', types=[str])
 class Like(FieldOperator):
     pass
+
+@Engine.operator(operator='match', types=[str])
+class Match(FieldOperator):
+    pass
