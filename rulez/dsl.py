@@ -6,56 +6,48 @@ from .engine import OperatorNotAllowedError
 
 
 class AND(boolean.AND):
-
     def json(self, allowed_operators=None):
         allowed_operators = allowed_operators or []
         values = []
         for a in self.args:
             j = a.json(allowed_operators)
-            if allowed_operators and j['operator'].lower() not in allowed_operators:
-                raise OperatorNotAllowedError(j['operator'])
+            if allowed_operators and j["operator"].lower() not in allowed_operators:
+                raise OperatorNotAllowedError(j["operator"])
             values.append(j)
-        return {
-            'operator': 'and',
-            'value': values
-        }
+        return {"operator": "and", "value": values}
 
 
 class OR(boolean.OR):
-
     def json(self, allowed_operators=None):
         allowed_operators = allowed_operators or []
         values = []
         for a in self.args:
             j = a.json(allowed_operators)
-            if allowed_operators and j['operator'].lower() not in allowed_operators:
-                raise OperatorNotAllowedError(j['operator'])
+            if allowed_operators and j["operator"].lower() not in allowed_operators:
+                raise OperatorNotAllowedError(j["operator"])
             values.append(j)
-        return {
-            'operator': 'or',
-            'value': values
-        }
+        return {"operator": "or", "value": values}
 
 
-float_pattern = re.compile(r'^\d+\.\d+$')
-int_pattern = re.compile(r'^\d+$')
+float_pattern = re.compile(r"^\d+\.\d+$")
+int_pattern = re.compile(r"^\d+$")
+
 
 class FIELD(boolean.Symbol):
-
     def decode_symbol(self):
-        for op in ['==', '<=', '>=', '!=', '<', '>', '=', ' in ']:
+        for op in ["==", "<=", ">=", "!=", "<", ">", "=", " in "]:
             if op in self.obj:
                 ss = self.obj.split(op)
                 if len(ss) != 2:
                     raise ValueError('Unable to decode "%s"' % self.obj)
                 k, v = ss
-                if op.strip() in ['in']:
+                if op.strip() in ["in"]:
                     ov = v.strip()
-                    if ov.startswith('(') or ov.startswith('['):
+                    if ov.startswith("(") or ov.startswith("["):
                         ov = ov[1:]
-                    if ov.endswith(')') or ov.endswith(']'):
+                    if ov.endswith(")") or ov.endswith("]"):
                         ov = ov[:-1]
-                    ov = ov.strip().split(',')
+                    ov = ov.strip().split(",")
                     v = []
                     for vv in ov:
                         vv = vv.strip()
@@ -75,32 +67,28 @@ class FIELD(boolean.Symbol):
         k, o, v = s
         value = v
         if isinstance(value, str):
-            if re.match(r'^[\d\.]+$', value):
-                if value.find('.') == 1:
+            if re.match(r"^[\d\.]+$", value):
+                if value.find(".") == 1:
                     value = float(value)
-                elif value.find('.') < 1:
+                elif value.find(".") < 1:
                     value = int(value)
         if allowed_operators and o.lower() not in allowed_operators:
             raise OperatorNotAllowedError(o)
-        return {
-            'field': k,
-            'operator': o,
-            'value': value
-        }
+        return {"field": k, "operator": o, "value": value}
 
 
 class BooleanAlgebra(boolean.BooleanAlgebra):
-
     def __init__(self):
         super(BooleanAlgebra, self).__init__(
-            Symbol_class=FIELD, AND_class=AND, OR_class=OR)
+            Symbol_class=FIELD, AND_class=AND, OR_class=OR
+        )
 
     def tokenize(self, s):
         ops = {
-            'or': boolean.TOKEN_OR,
-            'and': boolean.TOKEN_AND,
-            '(': boolean.TOKEN_LPAR,
-            ')': boolean.TOKEN_RPAR
+            "or": boolean.TOKEN_OR,
+            "and": boolean.TOKEN_AND,
+            "(": boolean.TOKEN_LPAR,
+            ")": boolean.TOKEN_RPAR,
         }
 
         tokens = []
@@ -115,7 +103,7 @@ class BooleanAlgebra(boolean.BooleanAlgebra):
                 elif tokens[-1].lower() in ops.keys():
                     tokens.append(t)
                 else:
-                    tokens[-1] += ' %s' % t
+                    tokens[-1] += " %s" % t
 
         for col, tok in enumerate(tokens):
             if tok.lower() in ops:
@@ -130,83 +118,63 @@ def parse_dsl(s, allowed_operators=None):
     parsed = algebra.parse(s)
     res = parsed.json(allowed_operators)
     for i in res:
-        if allowed_operators and (
-                res['operator'].lower() not in allowed_operators):
-            raise OperatorNotAllowedError(res['operator'])
+        if allowed_operators and (res["operator"].lower() not in allowed_operators):
+            raise OperatorNotAllowedError(res["operator"])
     return res
 
 
-class Field(object):
-
-    def __init__(self, key):
-        self.key = key
-
-    def __eq__(self, value):
-        return {
-            'field': self.key,
-            'operator': '==',
-            'value': value
-        }
-
-    def __gt__(self, value):
-        return {
-            'field': self.key,
-            'operator': '>',
-            'value': value
-        }
-
-    def __lt__(self, value):
-        return {
-            'field': self.key,
-            'operator': '<',
-            'value': value
-        }
-
-    def __ge__(self, value):
-        return {
-            'field': self.key,
-            'operator': '>=',
-            'value': value
-        }
-
-    def __le__(self, value):
-        return {
-            'field': self.key,
-            'operator': '<=',
-            'value': value
-        }
-
-    def __ne__(self, value):
-        return {
-            'field': self.key,
-            'operator': '!=',
-            'value': value
-        }
-
-    def in_(self, values):
-        return {
-            'field': self.key,
-            'operator': 'in',
-            'value': values
-        }
-
-
 def or_(*args):
-    return {
-        'operator': 'or',
-        'value': list(args)
-    }
+    return {"operator": "or", "value": list(args)}
 
 
 def and_(*args):
-    return {
-        'operator': 'and',
-        'value': list(args)
-    }
+    return {"operator": "and", "value": list(args)}
+
+
+class Operation(dict):
+    def __and__(self, value):
+        return Operation(and_(self, value))
+
+    def __or__(self, value):
+        return Operation(or_(self, value))
+
+
+class Field(dict):
+    def __init__(self, key):
+        self.key = key
+        super().__init__({"operator": "get", "value": key})
+
+    def __eq__(self, value):
+        return Operation({"field": self.key, "operator": "==", "value": value})
+
+    def __gt__(self, value):
+        return Operation({"field": self.key, "operator": ">", "value": value})
+
+    def __lt__(self, value):
+        return Operation({"field": self.key, "operator": "<", "value": value})
+
+    def __ge__(self, value):
+        return Operation({"field": self.key, "operator": ">=", "value": value})
+
+    def __le__(self, value):
+        return Operation({"field": self.key, "operator": "<=", "value": value})
+
+    def __ne__(self, value):
+        return Operation({"field": self.key, "operator": "!=", "value": value})
+
+    def in_(self, values):
+        if not isinstance(values, list):
+            raise TypeError("Expected a list")
+        return Operation({"field": self.key, "operator": "in", "value": values})
+
+    def __and__(self, value):
+        return Operation(and_(self, value))
+
+    def __or__(self, value):
+        return Operation(or_(self, value))
 
 
 class FieldGetter(object):
-
     def __getitem__(self, key):
         return Field(key)
 
