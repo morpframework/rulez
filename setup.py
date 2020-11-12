@@ -5,8 +5,12 @@ from setuptools import find_packages, setup
 
 version = "0.1.3"
 
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
-    desc = f.read()
+def readfile(name):
+    with open(os.path.join(os.path.dirname(__file__), name)) as f:
+        out = f.read()
+    return out
+
+desc = '\n'.join([readfile('README.rst'), readfile('CHANGELOG.rst')])
 
 setup(
     name="rulez",
