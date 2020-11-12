@@ -14,7 +14,7 @@ class AND(boolean.AND):
             if allowed_operators and j["operator"].lower() not in allowed_operators:
                 raise OperatorNotAllowedError(j["operator"])
             values.append(j)
-        return {"operator": "and", "value": values}
+        return Operation({"operator": "and", "value": values})
 
 
 class OR(boolean.OR):
@@ -26,11 +26,13 @@ class OR(boolean.OR):
             if allowed_operators and j["operator"].lower() not in allowed_operators:
                 raise OperatorNotAllowedError(j["operator"])
             values.append(j)
-        return {"operator": "or", "value": values}
+        return Operation({"operator": "or", "value": values})
 
 
 float_pattern = re.compile(r"^\d+\.\d+$")
 int_pattern = re.compile(r"^\d+$")
+str1_pattern = re.compile(r'^"[\w+ ]*"$')
+str2_pattern = re.compile(r"^'[\w+ ]*'$")
 
 
 class FIELD(boolean.Symbol):
@@ -55,6 +57,8 @@ class FIELD(boolean.Symbol):
                             vv = float(vv)
                         elif int_pattern.match(vv):
                             vv = int(vv)
+                        elif str1_pattern.match(vv) or str2_pattern.match(vv):
+                            vv = vv[1:-1]
                         v.append(vv)
                 else:
                     v = v.strip()
@@ -67,14 +71,19 @@ class FIELD(boolean.Symbol):
         k, o, v = s
         value = v
         if isinstance(value, str):
-            if re.match(r"^[\d\.]+$", value):
-                if value.find(".") == 1:
-                    value = float(value)
-                elif value.find(".") < 1:
-                    value = int(value)
+            if float_pattern.match(value):
+                value = float(value)
+            elif int_pattern.match(value):
+                value = int(value)
+            elif str1_pattern.match(value) or str2_pattern.match(value):
+                value = value[1:-1]
+            elif re.match(r"^\w+$", value):
+                value = Field(value)
+            else:
+                raise ValueError("Unable to decode value '%s'" % value)
         if allowed_operators and o.lower() not in allowed_operators:
             raise OperatorNotAllowedError(o)
-        return {"field": k, "operator": o, "value": value}
+        return Operation({"field": k, "operator": o, "value": value})
 
 
 class BooleanAlgebra(boolean.BooleanAlgebra):
@@ -92,8 +101,11 @@ class BooleanAlgebra(boolean.BooleanAlgebra):
         }
 
         tokens = []
-        splitted = shlex.split(s)
-
+        s = s.replace("(", " ( ")
+        s = s.replace(")", " ) ")
+        s = s.replace("]", " ] ")
+        s = s.replace("[", " [ ")
+        splitted = shlex.split(s, posix=False)
         for t in splitted:
             if t.lower() in ops.keys():
                 tokens.append(t)
