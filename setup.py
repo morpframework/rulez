@@ -5,12 +5,14 @@ from setuptools import find_packages, setup
 
 version = "0.1.3"
 
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
+    desc = f.read()
+
 setup(
     name="rulez",
     version=version,
     description="Simple business rules engine configurable using YAML/JSON",
-    long_description="""\
-""",
+    long_description=desc,
     # Get strings from
     # http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[],
