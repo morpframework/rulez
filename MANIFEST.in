@@ -1,0 +1,5 @@
+recursive-include rulez *
+recursive-include docs *
+recursive-include tests *
+include *
+global-exclude *.pyc
