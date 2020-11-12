@@ -33,6 +33,7 @@ float_pattern = re.compile(r"^\d+\.\d+$")
 int_pattern = re.compile(r"^\d+$")
 str1_pattern = re.compile(r'^"[\w+ ]*"$')
 str2_pattern = re.compile(r"^'[\w+ ]*'$")
+field_pattern = re.compile(r"^\w+$")
 
 
 class FIELD(boolean.Symbol):
@@ -63,12 +64,16 @@ class FIELD(boolean.Symbol):
                 else:
                     v = v.strip()
                 return k.strip(), op.strip(), v
+        if field_pattern.match(self.obj):
+            return None, None, Field(self.obj)
         raise ValueError("Unable to decode symbol '%s'" % self.obj)
 
     def json(self, allowed_operators=None):
         allowed_operators = allowed_operators or []
         s = self.decode_symbol()
         k, o, v = s
+        if k is None and o is None and isinstance(v, Field):
+            return v
         value = v
         if isinstance(value, str):
             if float_pattern.match(value):
@@ -77,7 +82,7 @@ class FIELD(boolean.Symbol):
                 value = int(value)
             elif str1_pattern.match(value) or str2_pattern.match(value):
                 value = value[1:-1]
-            elif re.match(r"^\w+$", value):
+            elif field_pattern.match(value):
                 value = Field(value)
             else:
                 raise ValueError("Unable to decode value '%s'" % value)
