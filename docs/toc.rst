@@ -10,3 +10,4 @@ Documentation
    quickstart.rst
    comparators.rst
    syntaxsugar.rst
+   compilers.rst

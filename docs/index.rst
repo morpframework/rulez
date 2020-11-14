@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Rulez's documentation!
-=================================
+rulez: JSON based conditional rules
+====================================
 
 Rulez is a library that help with defining comparator/conditional operations declaratively
 through dictionary / JSON structure. Currently, it provides a compiler that 
