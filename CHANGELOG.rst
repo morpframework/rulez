@@ -5,7 +5,7 @@ Changelog
 ------------------
 
 - added docs
-- Deprecate ``rulez.field`` ``__getitem__`` method
+- Deprecate ``rulez.field`` ``__getitem__`` method in favor of ``__call__``
 
 
 0.1.3 (2020-11-12)

@@ -4,6 +4,7 @@ import boolean
 import json
 from .engine import OperatorNotAllowedError
 import warnings
+import typing
 
 
 class AND(boolean.AND):
@@ -130,17 +131,6 @@ class BooleanAlgebra(boolean.BooleanAlgebra):
                 yield boolean.TOKEN_SYMBOL, tok, col
 
 
-def parse_dsl(s, allowed_operators=None):
-    allowed_operators = allowed_operators or []
-    algebra = BooleanAlgebra()
-    parsed = algebra.parse(s)
-    res = parsed.json(allowed_operators)
-    for i in res:
-        if allowed_operators and (res["operator"].lower() not in allowed_operators):
-            raise OperatorNotAllowedError(res["operator"])
-    return res
-
-
 def or_(*args):
     return {"operator": "or", "value": list(args)}
 
@@ -194,11 +184,128 @@ class Field(dict):
 
 class FieldGetter(object):
     def __getitem__(self, key):
+        """
+
+        .. code-block:: pycon
+
+           >>> import rulez
+
+           >>> rulez.field['field1']
+           { 'operator': 'get', 'value': 'field1' }
+
+           >>> rulez.field['field1'] == 'myvalue'
+           { 'field': 'field1', 'operator': '==', 'value': 'myvalue' }
+
+           >>> rulez.field['field1'] == rulez.field['field2']
+           { 'field': 'field1', 'operator': '==',
+             'value': {
+                   'operator': 'get',
+                   'value': 'field2' }}
+
+           >>> rulez.field['field1'] & rulez.field['field2']
+           {'operator': 'and',
+            'value': [
+                {'operator': 'get', 'value': 'field1'},
+                {'operator': 'get', 'value': 'field2'}]}
+
+           >>> rulez.field['field1'] | rulez.field['field2']
+           {'operator': 'or',
+            'value': [
+                {'operator': 'get', 'value': 'field1'},
+                {'operator': 'get', 'value': 'field2'}]}
+
+        .. note::
+
+           ``rulez.field[key]`` is deprecated at version 0.1.4 in favor of
+           ``rulez.field(key)``.
+
+        """
+
         warnings.warn("Getitem accessor is deprecated", DeprecationWarning)
         return Field(key)
 
     def __call__(self, key):
+
+        """
+
+        .. code-block:: pycon
+
+           >>> import rulez
+
+           >>> rulez.field('field1')
+           { 'operator': 'get', 'value': 'field1' }
+
+           >>> rulez.field('field1') == 'myvalue'
+           { 'field': 'field1', 'operator': '==', 'value': 'myvalue' }
+
+           >>> rulez.field('field1') == rulez.field('field2')
+           { 'field': 'field1', 'operator': '==',
+             'value': {
+                   'operator': 'get',
+                   'value': 'field2' }}
+
+           >>> rulez.field('field1') & rulez.field('field2')
+           {'operator': 'and',
+            'value': [
+                {'operator': 'get', 'value': 'field1'},
+                {'operator': 'get', 'value': 'field2'}]}
+
+           >>> rulez.field('field1') | rulez.field('field2')
+           {'operator': 'or',
+            'value': [
+                {'operator': 'get', 'value': 'field1'},
+                {'operator': 'get', 'value': 'field2'}]}
+
+        """
+
         return Field(key)
 
 
 field = FieldGetter()
+
+
+def parse_dsl(
+    s, allowed_operators: typing.Optional[typing.List[str]] = None
+) -> Operation:
+    """
+    Parse string and output comparison operation.
+
+    :param s: query string
+    :param allowed_operators: List of allowed operators
+    :type allowed_operators: typing.Optional[typing.List[str]]
+
+    .. code-block:: pycon
+
+       >>> import rulez
+       >>> rulez.parse_dsl("field1 == field2")
+       {'field': 'field1', 'operator': '==',
+        'value': {'operator': 'get',
+                  'value': 'field2'}}
+
+       >>> rulez.parse_dsl("field1 == 'hello world'")
+       {'field': 'field1', 'operator': '==',
+        'value': 'hello world'}
+
+       >>> rulez.parse_dsl("(field1 == field2) or (field3 == 'value1')")
+       {'operator': 'or',
+        'value': [{'field': 'field1', 'operator': '==',
+                   'value': {'operator': 'get', 'value': 'field2'}},
+                  {'field': 'field3', 'operator': '==',
+                    'value': 'value1'}]}
+
+       >>> rulez.parse_dsl('field1 in ["a","b","c"]')
+       {'field': 'field1', 'operator': 'in', 'value': ['a', 'b', 'c']}
+
+       >>> rulez.parse_dsl('field1 in in [1.0,2.0,3.0]')
+       {'field': 'field1', 'operator': 'in', 'value': [1.0, 2.0, 3.0]}
+
+
+    """
+    allowed_operators = allowed_operators or []
+    algebra = BooleanAlgebra()
+    parsed = algebra.parse(s)
+    res = parsed.json(allowed_operators)
+    for i in res:
+        if allowed_operators and (res["operator"].lower() not in allowed_operators):
+            raise OperatorNotAllowedError(res["operator"])
+    return res
