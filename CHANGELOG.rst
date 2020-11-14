@@ -4,7 +4,8 @@ Changelog
 0.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- added docs
+- Deprecate ``rulez.field`` ``__getitem__`` method
 
 
 0.1.3 (2020-11-12)

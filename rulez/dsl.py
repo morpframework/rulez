@@ -3,6 +3,7 @@ import re
 import boolean
 import json
 from .engine import OperatorNotAllowedError
+import warnings
 
 
 class AND(boolean.AND):
@@ -193,6 +194,10 @@ class Field(dict):
 
 class FieldGetter(object):
     def __getitem__(self, key):
+        warnings.warn("Getitem accessor is deprecated", DeprecationWarning)
+        return Field(key)
+
+    def __call__(self, key):
         return Field(key)
 
 
