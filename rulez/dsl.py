@@ -90,6 +90,11 @@ class FIELD(boolean.Symbol):
                 raise ValueError("Unable to decode value '%s'" % value)
         if allowed_operators and o.lower() not in allowed_operators:
             raise OperatorNotAllowedError(o)
+
+        k = k.replace(' [ ', '[')
+        k = k.replace(' ] ', ']')
+        if ' ' in k:
+            raise ValueError("Invalid field '%s'" % k)
         return Operation({"field": k, "operator": o, "value": value})
 
 
