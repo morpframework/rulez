@@ -14,9 +14,9 @@ def elasticsearch_proc(request):
         os.environ['ELASTICSEARCH_EXECUTABLE'],
         '-p', '/tmp/elasticsearch.%s.pid' % port,
         '-E', 'http.port=%s' % port,
-        '-E', 'default.path.logs=/tmp/elasticsearch_%s_logs' % port,
+        '-E', 'path.logs=/tmp/elasticsearch_%s_logs' % port,
         '-E', 'cluster.name=elasticsearch_cluster_%s' % port,
-        '-E', "network.publish_host='127.0.0.1'",
+        '-E', "network.publish_host=127.0.0.1",
         '-E', 'index.store.type=mmapfs'
     ]
     es_proc = mirakuru.HTTPExecutor(

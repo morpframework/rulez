@@ -52,7 +52,7 @@ def test_elasticsearch_condition(elasticsearch):
     assert sorted([d['age'] for d in data]) == [17, 18, 19]
 
     for name in ["a", "b", "c", "d"]:
-        es.index(index="test-index", doc_type='names',
+        es.index(index="test-index-names", doc_type='names',
                  body={'name': name}, refresh='wait_for')
 
     rule = {
@@ -64,7 +64,7 @@ def test_elasticsearch_condition(elasticsearch):
 
     f = engine.compile_condition('elasticsearch', rule)
 
-    r = es.search(index='test-index', doc_type='names', body={
+    r = es.search(index='test-index-names', doc_type='names', body={
         'query': f()
     })
 
@@ -74,7 +74,7 @@ def test_elasticsearch_condition(elasticsearch):
 
     f = engine.compile_condition('elasticsearch', rule)
 
-    r = es.search(index='test-index', doc_type='names', body={
+    r = es.search(index='test-index-names', doc_type='names', body={
         'query': f()
     })
 

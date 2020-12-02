@@ -39,7 +39,7 @@ setup(
     extras_require={
         "test": [
             "mirakuru",
-            "elasticsearch>=5.0.0,<6.0.0",
+            "elasticsearch>7.0.0,<8.0.0",
         ]
     },
     entry_points="""
