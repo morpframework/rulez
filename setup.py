@@ -24,7 +24,7 @@ setup(
     author="Izhar Firdaus",
     author_email="izhar@abyres.net",
     url="http://github.com/abyres/",
-    license="MIT",
+    license="Apache-2.0",
     packages=find_packages(exclude=["ez_setup", "examples", "tests"]),
     include_package_data=True,
     zip_safe=False,
