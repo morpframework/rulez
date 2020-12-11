@@ -4,7 +4,8 @@ Changelog
 0.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- reject field name with spaces
+- fix '~' operator support when using 'and' and elasticsearch 
 
 
 0.1.4 (2020-11-14)

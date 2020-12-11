@@ -70,6 +70,23 @@ def test_elasticsearch_condition(elasticsearch):
 
     sorted([a['_source']['name'] for a in r['hits']['hits']]) == ['a', 'c']
 
+    rule = {
+        "operator": "or", "value": [
+            {"field": "name", "operator": "~", "value": "a"},
+            {"field": "name", "operator": "~", "value": "c"},
+        ]
+    }
+
+    f = engine.compile_condition('elasticsearch', rule)
+
+    r = es.search(index='test-index-names', doc_type='names', body={
+        'query': f()
+    })
+
+    sorted([a['_source']['name'] for a in r['hits']['hits']]) == ['a', 'c']
+
+
+
     rule = {'field': 'name', "operator": "in", "value": ["b", "d"]}
 
     f = engine.compile_condition('elasticsearch', rule)
