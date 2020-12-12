@@ -35,8 +35,8 @@ class OR(boolean.OR):
 
 float_pattern = re.compile(r"^\d+\.\d+$")
 int_pattern = re.compile(r"^\d+$")
-str1_pattern = re.compile(r'^"[\.\-\/\\\:\w+ ]*"$')
-str2_pattern = re.compile(r"^'[\.\-\/\\\:\w+ ]*'$")
+str1_pattern = re.compile(r'^"[\.\-\/\\\:\+\w+ ]*"$')
+str2_pattern = re.compile(r"^'[\.\-\/\\\:\+\w+ ]*'$")
 field_pattern = re.compile(r"^\w+$")
 
 
