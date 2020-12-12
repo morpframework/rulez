@@ -29,7 +29,6 @@ class OperatorAction(dectate.Action):
         def operator(engine, operator, value, field=None, value_type=None):
             if field is not None:
                 return op(operator, engine, field, value, value_type=value_type)
-            print(op)
             return op(operator, engine, value, value_type=value_type)
 
         app_class.get_operator.register(
