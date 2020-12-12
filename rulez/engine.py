@@ -3,18 +3,15 @@ import reg
 
 
 class OperatorNotAllowedError(Exception):
-
     def __init__(self, message, *args, **kwargs):
         message = "Operator '%s' is not allowed" % message
         super(OperatorNotAllowedError, self).__init__(message, *args, **kwargs)
 
 
 class NestedOperationNotAllowedError(Exception):
-
     def __init__(self, message, *args, **kwargs):
         message = "NestedOperation '%s' is not allowed" % message
-        super(NestedOperationNotAllowedError, self).__init__(
-            message, *args, **kwargs)
+        super(NestedOperationNotAllowedError, self).__init__(message, *args, **kwargs)
 
 
 class OperatorAction(dectate.Action):
@@ -29,15 +26,15 @@ class OperatorAction(dectate.Action):
         return str((app_class, self.operator, self.type))
 
     def perform(self, op, app_class):
-
-        def operator(engine, operator, value, field=None):
+        def operator(engine, operator, value, field=None, value_type=None):
             if field is not None:
-                return op(operator, engine, field, value)
-            return op(operator, engine, value)
+                return op(operator, engine, field, value, value_type=value_type)
+            print(op)
+            return op(operator, engine, value, value_type=value_type)
 
-        app_class.get_operator.register(operator,
-                                        operator=self.operator,
-                                        value=self.type)
+        app_class.get_operator.register(
+            operator, operator=self.operator, value=self.type,
+        )
 
 
 class OperatorCompilerAction(dectate.Action):
@@ -53,9 +50,9 @@ class OperatorCompilerAction(dectate.Action):
 
     def perform(self, obj, app_class):
 
-        app_class.compile_operator.register(
-            method=self.method,
-            operator=self.operator)(obj)
+        app_class.compile_operator.register(method=self.method, operator=self.operator)(
+            obj
+        )
 
 
 class ActionAction(dectate.Action):
@@ -69,7 +66,6 @@ class ActionAction(dectate.Action):
         return str((app_class, self.action))
 
     def perform(self, obj, app_class):
-
         @app_class.get_action.register(action=self.action)
         def action(engine, action, parameter):
             return obj(self.action, engine, **parameter)
@@ -87,8 +83,7 @@ class ActionCompilerAction(dectate.Action):
         return str((app_class, self.method, self.action))
 
     def perform(self, obj, app_class):
-        app_class.compile_action.register(
-            method=self.method, action=self.action)(obj)
+        app_class.compile_action.register(method=self.method, action=self.action)(obj)
 
 
 class RuleChainCompilerAction(dectate.Action):
@@ -103,8 +98,7 @@ class RuleChainCompilerAction(dectate.Action):
 
     def perform(self, obj, app_class):
 
-        app_class.compile_rulechain.register(
-            method=self.method)(obj)
+        app_class.compile_rulechain.register(method=self.method)(obj)
 
 
 class Engine(dectate.App):
@@ -120,6 +114,7 @@ class Engine(dectate.App):
             for t in types + [type(None)]:
                 klass._operator(operator, t)(op)
             return op
+
         return func
 
     operator_compiler = dectate.directive(OperatorCompilerAction)
@@ -127,37 +122,41 @@ class Engine(dectate.App):
     action_compiler = dectate.directive(ActionCompilerAction)
 
     @reg.dispatch_method(
-        reg.match_key('operator',
-                      lambda self, operator, value, field: operator),
-        reg.match_instance('value'))
-    def get_operator(self, operator, value, field=None):
+        reg.match_key(
+            "operator", lambda self, operator, value, field, value_type: operator
+        ),
+        reg.match_instance("value"),
+    )
+    def get_operator(self, operator, value, field=None, value_type=None):
         raise NotImplementedError
 
     @reg.dispatch_method(
-        reg.match_key('method',
-                      lambda self, method, operator: method),
-        reg.match_instance('operator'))
+        reg.match_key("method", lambda self, method, operator: method),
+        reg.match_instance("operator"),
+    )
     def compile_operator(self, method, operator):
         raise NotImplementedError((method, operator))
 
     @reg.dispatch_method(
-        reg.match_key('action', lambda self, action, parameter: action))
+        reg.match_key("action", lambda self, action, parameter: action)
+    )
     def get_action(self, action, parameter):
         raise NotImplementedError((action, parameter))
 
     @reg.dispatch_method(
-        reg.match_key('method', lambda self, method, action: method),
-        reg.match_instance('action'))
+        reg.match_key("method", lambda self, method, action: method),
+        reg.match_instance("action"),
+    )
     def compile_action(self, method, action):
         raise NotImplementedError((method, action))
 
     def parse_condition(self, config):
-        param = {
-            'operator': config['operator'],
-            'value': config['value']
-        }
-        if config.get('field', None):
-            param['field'] = config['field']
+        param = {"operator": config["operator"], "value": config["value"]}
+        if config.get("field", None):
+            param["field"] = config["field"]
+
+        if config.get("value_type", None):
+            param["value_type"] = config["value_type"]
 
         parsed = self.get_operator(**param)
         return parsed
@@ -165,35 +164,40 @@ class Engine(dectate.App):
     def parse_action(self, config):
         return self.get_action(**config)
 
-    def compile_condition(self, method, query, allowed_operators=None,
-                          nestable_operators=None):
+    def compile_condition(
+        self, method, query, allowed_operators=None, nestable_operators=None
+    ):
         self.validate_condition(query, allowed_operators, nestable_operators)
         q = self.parse_condition(query)
         return self.compile_operator(method, q)
 
     @reg.dispatch_method(
-        reg.match_key('method', lambda self, method, rulechain: method))
+        reg.match_key("method", lambda self, method, rulechain: method)
+    )
     def compile_rulechain(self, method, rulechain):
         raise NotImplementedError
 
-    def validate_condition(self, query, allowed_operators=None,
-                           nestable_operators=None):
+    def validate_condition(
+        self, query, allowed_operators=None, nestable_operators=None
+    ):
         parsed = self.parse_condition(query)
         self._validate_condition(parsed, allowed_operators, nestable_operators)
 
-    def _validate_condition(self, query, allowed_operators=None,
-                            nestable_operators=None):
+    def _validate_condition(
+        self, query, allowed_operators=None, nestable_operators=None
+    ):
         from .operator import Operator
 
-        if (allowed_operators is not None and
-                query.operator not in allowed_operators):
+        if allowed_operators is not None and query.operator not in allowed_operators:
             raise OperatorNotAllowedError(query.operator)
 
         if isinstance(query.value, list) or isinstance(query.value, tuple):
             for v in query.value:
                 if isinstance(v, Operator):
-                    if (nestable_operators is not None and
-                            query.operator in nestable_operators and
-                            v.operator in nestable_operators):
+                    if (
+                        nestable_operators is not None
+                        and query.operator in nestable_operators
+                        and v.operator in nestable_operators
+                    ):
                         raise NestedOperationNotAllowedError(query)
                     self._validate_condition(v, allowed_operators)

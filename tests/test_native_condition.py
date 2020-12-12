@@ -90,3 +90,29 @@ def test_native_condition():
                 ]
              }]},
             nestable_operators=['and', 'or'])
+
+def test_native_condition_dt():
+    from rulez import Engine
+    from datetime import date, datetime
+
+    rule = {"field": "dt", "operator": "<=", "value": '2020-01-01',
+            'value_type': 'date'}
+
+    engine = Engine()
+
+    f = engine.compile_condition('native', rule)
+
+    assert f({'dt': date(2019,1,1)}) == True
+    assert f({'dt': date(2030,1,1)}) == False
+
+
+    rule = {"field": "dt", "operator": "<=", "value": '2020-01-01T01:01',
+            'value_type': 'datetime'}
+
+    f = engine.compile_condition('native', rule)
+
+
+    assert f({'dt': datetime(2020,1,1, 0,0)}) == True
+    assert f({'dt': datetime(2020,1,1, 2,2)}) == False
+
+

@@ -1,17 +1,22 @@
-import reg
 import operator as op
+
+import reg
+from dateutil.parser import parse as parse_dt
+
 from .engine import Engine
 
 
 class Operator(object):
-    def __init__(self, operator, engine, value):
+    def __init__(self, operator, engine, value, value_type=None):
         self.operator = operator
+        self.value_type = value_type
         vals = []
         for v in value or []:
             op = v["operator"]
             value = v["value"]
+            value_type = v.get("value_type", None)
             field = v.get("field", None)
-            o = engine.get_operator(op, value, field)
+            o = engine.get_operator(op, value, field, value_type=value_type)
             vals.append(o)
         self.value = vals
 
@@ -45,12 +50,19 @@ class Or(Operator):
 
 
 class FieldOperator(Operator):
-    def __init__(self, operator, engine, field, value):
+    def __init__(self, operator, engine, field, value, value_type=None):
         self.operator = operator
         self.field = field
+        self.value_type = value_type
         if isinstance(value, dict) and value.get("operator", None):
             value = engine.get_operator(**value)
-        self.value = value
+
+        if value_type == "date":
+            self.value = parse_dt(value).date()
+        elif value_type == "datetime":
+            self.value = parse_dt(value)
+        else:
+            self.value = value
 
 
 @Engine.operator(operator="==", types=[dict, str, float, int])
@@ -146,9 +158,10 @@ class In(FieldOperator):
 
 
 class FieldGetter(Operator):
-    def __init__(self, operator, engine, value):
+    def __init__(self, operator, engine, value, value_type=None):
         self.operator = operator
         self.value = value
+        self.value_type = value_type
 
 
 @Engine.operator(operator="get", types=[str])
