@@ -6,6 +6,7 @@ Changelog
 
 - reject field name with spaces
 - fix '~' operator support when using 'and' and elasticsearch 
+- allow typecasting of value to date/datetime
 
 
 0.1.4 (2020-11-14)
