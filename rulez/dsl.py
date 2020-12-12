@@ -1,10 +1,12 @@
-import shlex
-import re
-import boolean
 import json
-from .engine import OperatorNotAllowedError
-import warnings
+import re
+import shlex
 import typing
+import warnings
+
+import boolean
+
+from .engine import OperatorNotAllowedError
 
 
 class AND(boolean.AND):
@@ -33,8 +35,8 @@ class OR(boolean.OR):
 
 float_pattern = re.compile(r"^\d+\.\d+$")
 int_pattern = re.compile(r"^\d+$")
-str1_pattern = re.compile(r'^"[\w+ ]*"$')
-str2_pattern = re.compile(r"^'[\w+ ]*'$")
+str1_pattern = re.compile(r'^"[\.\-\/\\\:\w+ ]*"$')
+str2_pattern = re.compile(r"^'[\.\-\/\\\:\w+ ]*'$")
 field_pattern = re.compile(r"^\w+$")
 
 
@@ -91,9 +93,9 @@ class FIELD(boolean.Symbol):
         if allowed_operators and o.lower() not in allowed_operators:
             raise OperatorNotAllowedError(o)
 
-        k = k.replace(' [ ', '[')
-        k = k.replace(' ] ', ']')
-        if ' ' in k:
+        k = k.replace(" [ ", "[")
+        k = k.replace(" ] ", "]")
+        if " " in k:
             raise ValueError("Invalid field '%s'" % k)
         return Operation({"field": k, "operator": o, "value": value})
 
