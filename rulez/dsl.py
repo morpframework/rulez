@@ -3,6 +3,7 @@ import re
 import shlex
 import typing
 import warnings
+from datetime import date, datetime
 
 import boolean
 
@@ -159,23 +160,45 @@ class Field(dict):
         self.key = key
         super().__init__({"operator": "get", "value": key})
 
+    def _get_value_type(self, value):
+        if isinstance(value, date):
+            return "date"
+        if isinstance(value, datetime):
+            return "datetime"
+        return None
+
+    def _operator_param(self, operator, value):
+        value_type = self._get_value_type(value)
+        result = {"field": self.key, "value": value, "operator": operator}
+        if value_type:
+            result["value_type"] = value_type
+            if value_type in ["date", "datetime"]:
+                result["value"] = value.isoformat()
+        return result
+
     def __eq__(self, value):
-        return Operation({"field": self.key, "operator": "==", "value": value})
+        param = self._operator_param("==", value)
+        return Operation(param)
 
     def __gt__(self, value):
-        return Operation({"field": self.key, "operator": ">", "value": value})
+        param = self._operator_param(">", value)
+        return Operation(param)
 
     def __lt__(self, value):
-        return Operation({"field": self.key, "operator": "<", "value": value})
+        param = self._operator_param("<", value)
+        return Operation(param)
 
     def __ge__(self, value):
-        return Operation({"field": self.key, "operator": ">=", "value": value})
+        param = self._operator_param(">=", value)
+        return Operation(param)
 
     def __le__(self, value):
-        return Operation({"field": self.key, "operator": "<=", "value": value})
+        param = self._operator_param("<=", value)
+        return Operation(param)
 
     def __ne__(self, value):
-        return Operation({"field": self.key, "operator": "!=", "value": value})
+        param = self._operator_param("!=", value)
+        return Operation(param)
 
     def in_(self, values):
         if not isinstance(values, list):
