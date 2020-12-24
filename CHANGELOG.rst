@@ -7,6 +7,10 @@ Changelog
 - reject field name with spaces
 - fix '~' operator support when using 'and' and elasticsearch 
 - allow typecasting of value to date/datetime
+- allow '+' character in string dsl
+- fixed datetime handling in field dsl
+- update to elasticsearch 7
+- relicense to Apache License
 
 
 0.1.4 (2020-11-14)
