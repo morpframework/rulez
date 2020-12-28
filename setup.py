@@ -33,7 +33,8 @@ setup(
         "dectate",
         "boolean.py",
         "jsonpath_ng",
-        "sqlalchemy"
+        "sqlalchemy",
+        "dateutil",
         # -*- Extra requirements: -*-
     ],
     extras_require={
