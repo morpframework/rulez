@@ -34,7 +34,7 @@ setup(
         "boolean.py",
         "jsonpath_ng",
         "sqlalchemy",
-        "dateutil",
+        "python-dateutil",
         # -*- Extra requirements: -*-
     ],
     extras_require={
